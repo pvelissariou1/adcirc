@@ -120,6 +120,10 @@ Casey 100205: Add a variable for writing of SWAN hot-start files.
       USE SPONGELAYER, ONLY: LoadAbsLayerSigma, sponge_dis_mthd, sponge_opsplit0,
      &     adjust_sponge_sigma, getabslayerext, sponge_shift_soln
 
+!JLW: add subgrid module
+      USE subgrid, ONLY: level0, getEleLookup, getVertLookup
+     &   , subgridwetdry
+
       IMPLICIT NONE
       INTEGER, intent(in) :: IT
 C
@@ -1015,12 +1019,21 @@ C...  Compute new water surface elevation
 
 !---------------------END SOLVE GWCE------------------------------------
 
-
+!JLW: adding subgrid
+      IF(level0)THEN
+         !JLW: update element arrays
+         call getEleLookup()
+         !JLW: update vertex arrays
+         call getVertLookup()
+         !JLW: update nodecode, ncele, etc
+         call subgridwetdry()
+      ELSE
 !--------------------WETTING AND DRYING--------------------------------
 
-      call computeWettingAndDrying(it)
+         call computeWettingAndDrying(it)
 
 !--------------------WETTING AND DRYING--------------------------------
+      ENDIF
 
 C...
 C---------------2DDI Momentum Equation Solution-------------------------

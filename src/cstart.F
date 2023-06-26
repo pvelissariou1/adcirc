@@ -54,7 +54,6 @@ C
 #ifdef ADCNETCDF
       use Couple2BC3D, only: Initial_BC3D_NetCDF
 #endif
-
       IMPLICIT NONE
 
       INTEGER I, J,IOS, IJK
@@ -1736,6 +1735,10 @@ C----------------------------------------------------------------------
      &   EtaDisc
       use nodalattributes, only : loadStartDry, STARTDRY, GeoidOffset, 
      &   LoadGeoidOffset, OutputTau0, LoadRiver_et_WSE, River_et_WSE !jgf47.06
+!JLW: adding subgrid
+      use subgrid, only: level0, readsubgridlookup
+     &   , getvertlookup, getelelookup, subgridwetdry
+     &   , initVar
       implicit none
       integer :: nm1, nm2, nm3  ! node numbers around the element
       integer :: nc1, nc2, nc3  ! nodecodes around the element
@@ -1747,6 +1750,7 @@ C----------------------------------------------------------------------
       logical, allocatable :: dryReasonInitialized(:)
       logical :: found ! .true. if obsolete init river elevation file was found
       !
+      
       call setMessageSource(
      &   "setColdWetDryStateAndWaterSurfaceElevation")
 #if defined(COLDSTART_TRACE) || defined(ALL_TRACE)
@@ -1795,6 +1799,22 @@ C----------------------------------------------------------------------
             EtaDisc(NBV(I))=Eta2(NBV(I))
          ENDIF
       END DO
+
+!JLW: adding subgrid lookup table read in
+      IF(level0.EQ..true.)THEN
+!JLW: call subgrid lookup table read in
+         call readSubgridLookup()
+         if(nolifa.eq.2)then
+!JLW: initialize subgrid variables
+            call initVar()
+!JLW: call the vertex lookup subroutine
+            call getVertLookup()
+!JLW: call the elemental lookup subroutine
+            call getEleLookup()
+!JLW: now do wetting and drying check
+            call subgridwetdry()
+         endif    
+      ELSE
       !
       ! Set all nodes to wet by default.
       nnodecode(:)=1
@@ -1886,6 +1906,8 @@ C----------------------------------------------------------------------
             eta2=h0-dp
          end where
       endif
+!JLW: end subgrid if statement
+      ENDIF
       eta1(:) = eta2(:) 
 
 #if defined(COLDSTART_TRACE) || defined(ALL_TRACE)

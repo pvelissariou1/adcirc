@@ -37,7 +37,8 @@ if(BUILD_ADCPREP)
       ${CMAKE_CURRENT_SOURCE_DIR}/prep/machdep.F
       ${CMAKE_CURRENT_SOURCE_DIR}/src/sponge_layer.F
       ${CMAKE_CURRENT_SOURCE_DIR}/src/quadrature.F
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/couple2baroclinic3D.F)
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/couple2baroclinic3D.F
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/subgridLookup.F)
 
   add_executable(adcprep ${ADCPREP_SOURCES})
 
